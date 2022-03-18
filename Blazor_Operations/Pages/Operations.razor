@@ -1,0 +1,126 @@
+﻿@page "/operations"
+@using Blazor_Operations.Data
+@using Blazor_Operations.Services
+@inherits OwningComponentBase<OperationsServices>
+<h3>Operations</h3>
+
+<button class=" btn-primary" @onclick="Showpopup">Add New Record</button>
+@if (popup)
+{
+<div class="modal" tabindex="-1" role="dialog" style="display:block;">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Oprations Table</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" @onclick="Closepopup">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <EditForm Model="Objinsert" onvalidsubmit="Insertrecord">
+                <div class="modal-body">
+                    <table border="1">
+                        <tr>
+                            <td> Operation Name</td>
+                            <td> <input type="text" placeholder="Enter Operation Name..." @bind="Objinsert.Name" /></td>
+                        </tr>
+                        <tr>
+                            <td> OrderInWhichToPerform</td>
+                            <td> <input type="text" placeholder="Enter Operation Name..." @bind="Objinsert.OrderInWhichToPerform" /></td>
+                        </tr>
+                        <tr>
+                            <td> Image data</td>
+                            <td> <input type="image" src="" @bind="Objinsert.ImageData" /></td>
+                        </tr>
+                        <tr>
+                            <td> Device</td>
+                            <td> <input type="text" placeholder=" Enter device type" @bind="Objinsert.Device" /></td>
+                        </tr>
+                    </table>
+                </div>
+
+                <div class="modal-footer">
+
+                    <button type="submit" class="btn btn-secondary" data-dismiss="modal" @onclick="Closepopup">Save</button>
+                </div>
+
+
+
+            </EditForm>
+           
+            
+        </div>
+    </div>
+</div>
+}
+<table class="table">
+    <tr>
+        <th>Operation ID</th>
+        <th> Operation Name</th>
+        <th> OrderInWhichToPerform</th>
+        <th> ImageData</th>
+        <th> Device</th>
+    </tr>
+    
+    @foreach (var item in Displaydata)
+    {
+        <tr>
+            <td>@item.OperationID</td>
+            <td>@item.Name</td>
+            <td>@item.OrderInWhichToPerform</td>
+            <td>@item.ImageData</td>
+            <td>@item.Device</td>
+            <td><button class="btn-info" @onclick ="(()=>DeleteOperations(item))">Delete</button></td>
+        </tr>
+    }
+</table>
+
+@code {
+    List<Operationsclass> Displaydata;
+    Operationsclass Objinsert = new Operationsclass();
+    bool popup = false;
+
+    void Showpopup()
+    {
+        popup = true;
+    }
+
+    void Closepopup()
+    {
+        popup = false;
+    }
+
+
+    protected override void OnInitialized()
+    {
+        Displaydata = Service.GetOperations();
+    }
+
+    void Insertrecord()
+    {
+        var objtupdate = false;
+        if (Objinsert.OperationID > 0)
+        {
+            objtupdate = Service.UpdateOperations(Objinsert);
+            popup = false;
+        }
+        else
+        {
+            Objinsert.OperationID = 0;
+            Service.AddOperation(Objinsert);
+            Displaydata = Service.GetOperations();
+
+        }
+        Objinsert.OperationID = 0;
+        Service.AddOperation(Objinsert);
+        Displaydata = Service.GetOperations();
+    }
+
+
+    void DeleteOperations(Operationsclass rec)
+    {
+        Service.Delete(rec);
+        Displaydata.Clear();
+        Displaydata = Service.GetOperations();
+
+    }
+}
